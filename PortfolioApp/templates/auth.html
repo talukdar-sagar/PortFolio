@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Signup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #7c3aed;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            color: #7c3aed;
+            padding: 30px;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        input {
+            display: block;
+            width: 90%;
+            margin: 10px auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #7c3aed;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #6a2fcc;
+        }
+        .switch {
+            color: #7c3aed;
+            cursor: pointer;
+            text-decoration: underline;
+            display: block;
+            margin-top: 15px;
+        }
+        .hidden {
+            display: none;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginForm">
+            <h2>Login</h2>
+            <form id="login">
+                <input type="text" id="loginUsername" placeholder="Username" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <span class="switch" onclick="toggleForms()">Don't have an account? Sign up</span>
+        </div>
+
+        <!-- Signup Form (Initially Hidden) -->
+        <div id="signupForm" class="hidden">
+            <h2>Signup</h2>
+            <form id="signup">
+                <input type="text" id="signupUsername" placeholder="Username" required>
+                <input type="password" id="signupPassword" placeholder="Password" required>
+                <button type="submit">Signup</button>
+            </form>
+            <span class="switch" onclick="toggleForms()">Already have an account? Login</span>
+        </div>
+    </div>
+
+    <script>
+        // Function to toggle between Login and Signup forms
+        function toggleForms() {
+            document.getElementById("loginForm").classList.toggle("hidden");
+            document.getElementById("signupForm").classList.toggle("hidden");
+        }
+
+        // Handle Login
+        document.getElementById("login").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            let username = document.getElementById("loginUsername").value;
+            let password = document.getElementById("loginPassword").value;
+
+            let response = await fetch("/accounts/api/login/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            let result = await response.json();
+            if (response.ok) {
+                localStorage.setItem("token", result.token);
+                window.location.href = "/accounts/home/";
+            } else {
+                alert(result.error);
+            }
+        });
+
+        // Handle Signup
+        document.getElementById("signup").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            let username = document.getElementById("signupUsername").value;
+            let password = document.getElementById("signupPassword").value;
+
+            let response = await fetch("/accounts/api/signup/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            let result = await response.json();
+            if (response.ok) {
+                alert("Signup successful! Please login.");
+                toggleForms();
+            } else {
+                alert(result.error);
+            }
+        });
+    </script>
+</body>
+</html>
