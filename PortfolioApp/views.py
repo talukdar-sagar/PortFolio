@@ -73,11 +73,12 @@ class AddTaskView(APIView):
     def post(self,request,*args,**kwargs):
         token,username = request.session.get('auth_token'),request.session.get('auth_username')
         if not check_token(token,username):
-            return Response({"message":"Invalid Credentials"})
+            return Response({"message":"Invalid Credentials"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         try:
             title = request.data.get("task")
             if title:
-                ToDoModel.objects.create(title=title)
+                if ToDoModel.objects.filter(title=title).exists():
+                    ToDoModel.objects.create(title=title)
 
         except Exception as err:
             print(err)
@@ -91,7 +92,20 @@ class AddTaskView(APIView):
         tasks = ToDoModel.objects.all()
         return render(request,'C:/Users/SAGAR/OneDrive/Desktop/Projects/Portfolio/PortfolioApp/templates/todolist.html',{"tasks":tasks})
     
-
+class DeleteTaskView(APIView):
+    permission_classes = []
+    def post(self,request,*args,**kwargs):
+        token,username = request.session.get('auth_token'),request.session.get('auth_username')
+        if not check_token(token,username):
+            return Response({"message":"Invalid Credentials"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        try:
+            title_id = request.data.get("task_id")
+            title = ToDoModel.objects.get(id=title_id)
+            title.delete()
+        except Exception as err:
+            print(err)
+        tasks = ToDoModel.objects.all()
+        return render(request,'C:/Users/SAGAR/OneDrive/Desktop/Projects/Portfolio/PortfolioApp/templates/todolist.html',{"tasks":tasks})
 
 
 
